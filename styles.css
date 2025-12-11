@@ -1,0 +1,483 @@
+:root {
+    --bg-color: #0f172a;
+    --grid-bg: rgba(255, 255, 255, 0.03);
+    --border-color: rgba(255, 255, 255, 0.1);
+    --cell-active: rgba(255, 255, 255, 0.15);
+    --text-primary: #ffffff;
+    --text-secondary: #94a3b8;
+
+    /* Comet Colors - Default is Cyan */
+    --main-hue: 180;
+    /* Cyan */
+    --light-color: hsl(var(--main-hue), 100%, 50%);
+    --light-tail: hsla(var(--main-hue), 100%, 50%, 0.4);
+
+    --font-main: 'Outfit', sans-serif;
+}
+
+/* Rainbow Mode - Dreamy, wavy color breathing */
+@keyframes dreamy-hue {
+    0% {
+        filter: hue-rotate(0deg);
+    }
+
+    100% {
+        filter: hue-rotate(360deg);
+    }
+}
+
+/* Gentle rainbow glow that breathes through colors */
+body.rainbow-mode .grid-cell.head,
+body.rainbow-mode .go-btn {
+    background: linear-gradient(135deg, #22d3ee 0%, #a78bfa 50%, #f472b6 100%);
+    animation: dreamy-hue 10s linear infinite;
+    color: white;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+}
+
+body.rainbow-mode .go-btn {
+    box-shadow:
+        0 0 30px rgba(34, 211, 238, 0.5),
+        0 0 60px rgba(167, 139, 250, 0.3);
+}
+
+body.rainbow-mode h1 {
+    background: linear-gradient(135deg, #22d3ee 0%, #a78bfa 50%, #f472b6 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: dreamy-hue 10s linear infinite;
+}
+
+body.rainbow-mode .grid-cell.head {
+    box-shadow:
+        inset 0 0 25px rgba(255, 255, 255, 0.2),
+        0 0 25px rgba(34, 211, 238, 0.4),
+        0 0 50px rgba(167, 139, 250, 0.3);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-main);
+    background-color: var(--bg-color);
+    background-image:
+        radial-gradient(circle at 10% 20%, rgba(94, 234, 212, 0.1) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(167, 139, 250, 0.1) 0%, transparent 20%);
+    color: var(--text-primary);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.app-container {
+    display: flex;
+    flex-direction: row;
+    width: 90vw;
+    height: 85vh;
+    max-width: 1400px;
+    gap: 2rem;
+}
+
+/* Controls Panel */
+.controls-panel {
+    width: 300px;
+    padding: 2rem;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    z-index: 10;
+}
+
+h1 {
+    font-weight: 700;
+    font-size: 2rem;
+    color: var(--light-color);
+    text-shadow: 0 0 20px var(--light-color);
+    letter-spacing: -1px;
+    color: var(--light-color);
+    text-shadow: 0 0 20px var(--light-color);
+    letter-spacing: -1px;
+    transition: color 1s ease, text-shadow 1s ease;
+}
+
+.input-group {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+textarea {
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1rem;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 1rem;
+    resize: none;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+textarea:focus {
+    border-color: var(--light-color);
+}
+
+.secondary-btn {
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.secondary-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Theme Bar - Top of game area */
+.theme-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    align-self: flex-end;
+    /* Push to right */
+    margin-bottom: 1rem;
+}
+
+.theme-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* Segmented Control Container */
+.theme-segmented-control {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: rgba(15, 23, 42, 0.5);
+    padding: 0.25rem;
+    border-radius: 12px;
+}
+
+/* Individual Theme Buttons */
+.theme-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.9rem;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.theme-btn .btn-icon {
+    font-size: 1rem;
+}
+
+.theme-btn .btn-label {
+    white-space: nowrap;
+}
+
+.theme-btn:hover {
+    color: var(--text-primary);
+}
+
+.theme-btn.active {
+    background: rgba(0, 0, 0, 0.4);
+    color: var(--text-primary);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Inline Color Picker */
+.color-picker-inline {
+    display: none;
+}
+
+.color-picker-inline.visible {
+    display: flex;
+    align-items: center;
+}
+
+.color-picker-inline input[type="color"] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: none;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    padding: 0;
+}
+
+.color-picker-inline input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 2px;
+}
+
+.color-picker-inline input[type="color"]::-webkit-color-swatch {
+    border: none;
+    border-radius: 4px;
+}
+
+/* Game Area */
+.game-area {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    gap: 2rem;
+}
+
+/* Grid Container - The "Maze" */
+.grid-container {
+    display: grid;
+    /* Grid layout set via JS */
+    gap: 0;
+    /* ZERO GAP as requested */
+    width: 100%;
+    max-width: 800px;
+    aspect-ratio: 1;
+    /* Keep it vaguely square */
+    background: var(--grid-bg);
+    border-radius: 24px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    position: relative;
+}
+
+.grid-cell {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 500;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    /* Subtle seams */
+    transition: background-color 0.1s, color 0.1s;
+    user-select: none;
+}
+
+/* The Comet Effect */
+/* We don't animate the cell itself, we use a pseudo-element or class to show the light passage */
+
+.grid-cell.active {
+    background-color: rgba(34, 211, 238, 0.1);
+    /* Very subtle fill */
+    z-index: 2;
+}
+
+/* The specific "Head" of the comet */
+.grid-cell.head {
+    box-shadow: inset 0 0 20px var(--light-color), 0 0 30px var(--light-color);
+    background-color: var(--light-tail);
+    color: #fff;
+    text-shadow: 0 0 10px var(--light-color);
+    z-index: 10;
+    border-color: var(--light-color);
+    color: #fff;
+    text-shadow: 0 0 10px var(--light-color);
+    z-index: 10;
+    border-color: var(--light-color);
+    transition: box-shadow 1s ease, background-color 1s ease, text-shadow 1s ease, border-color 1s ease;
+}
+
+/* Example Trail lengths */
+.grid-cell.trail-1 {
+    box-shadow: inset 0 0 10px var(--light-tail);
+    border-color: var(--light-tail);
+    z-index: 9;
+}
+
+.grid-cell.trail-2 {
+    box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.1);
+    /* Neutral fade */
+    border-color: rgba(255, 255, 255, 0.1);
+    z-index: 8;
+}
+
+/* GO Button */
+.go-btn {
+    min-width: 200px;
+    width: auto;
+    /* Allow to grow */
+    padding: 0 4rem;
+    /* More side padding for long pill */
+    height: 60px;
+    border-radius: 30px;
+    /* Pill shape */
+    border: none;
+    background: var(--light-color);
+    /* Use variable */
+    color: white;
+    /* Let's keep white for neon look, usually works with shadow */
+    font-size: 1.1rem;
+    /* Slightly smaller to fit */
+    font-weight: 800;
+    white-space: nowrap;
+    /* Force single line */
+    cursor: pointer;
+    box-shadow: 0 0 20px var(--light-color), inset 0 0 10px rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    box-shadow: 0 0 20px var(--light-color), inset 0 0 10px rgba(255, 255, 255, 0.4);
+    transition: transform 0.1s, background 1s ease, box-shadow 1s ease;
+    font-family: inherit;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-family: inherit;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    position: relative;
+    overflow: hidden;
+    z-index: 10;
+}
+
+.go-btn:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 40px var(--light-color);
+}
+
+/* Lightning Effect Active State */
+.go-btn:active,
+.go-btn.active-anim {
+    transform: scale(0.98);
+    background: #fff;
+    color: #0ea5e9;
+    box-shadow:
+        0 0 10px #fff,
+        0 0 40px #00ffff,
+        0 0 80px #00ffff;
+    animation: lightning-flash 0.1s infinite;
+}
+
+@keyframes lightning-flash {
+    0% {
+        opacity: 1;
+        filter: contrast(1.5) brightness(2);
+    }
+
+    50% {
+        opacity: 0.8;
+        filter: contrast(2) brightness(5);
+    }
+
+    100% {
+        opacity: 1;
+        filter: contrast(1.5) brightness(2);
+    }
+}
+
+/* Winner Overlay */
+.winner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+    z-index: 100;
+}
+
+.winner-overlay.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.winner-content {
+    text-align: center;
+    transform: translateY(20px);
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.winner-overlay.visible .winner-content {
+    transform: translateY(0);
+}
+
+.winner-label {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    margin-bottom: 1rem;
+}
+
+.winner-name {
+    font-size: 5rem;
+    font-weight: 700;
+    color: white;
+    text-shadow: 0 0 40px var(--light-color);
+    margin-bottom: 2rem;
+}
+
+.reset-btn {
+    padding: 1rem 3rem;
+    background: white;
+    color: var(--bg-color);
+    border: none;
+    border-radius: 50px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.reset-btn:hover {
+    transform: scale(1.05);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .app-container {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+        padding: 1rem 0;
+    }
+
+    .controls-panel {
+        width: 100%;
+        height: auto;
+    }
+
+    .grid-container {
+        width: 100%;
+    }
+}
