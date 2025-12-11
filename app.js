@@ -344,7 +344,31 @@ class LightRoulette {
         this.winnerName.textContent = name;
         this.winnerOverlay.classList.add('visible');
         
-        // Optional: Trigger confetti or sound here
+        this.triggerHappyEmojis();
+    }
+
+    triggerHappyEmojis() {
+        const emojis = ['😁', '🎉', '🥳', '👏', '👯', '🌟', '✨', '🤩', '🎈', '🎊'];
+        const container = document.body;
+        
+        // Spawn 50 emojis
+        for (let i = 0; i < 50; i++) {
+            const el = document.createElement('div');
+            el.className = 'floating-emoji';
+            el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            
+            // Random properties
+            el.style.left = Math.random() * 100 + 'vw';
+            el.style.animationDuration = (2 + Math.random() * 3) + 's'; // 2-5s
+            el.style.fontSize = (1.5 + Math.random() * 2.5) + 'rem'; // 1.5-4rem
+            
+            container.appendChild(el);
+            
+            // Clean up
+            setTimeout(() => {
+                el.remove();
+            }, 5000);
+        }
     }
 
     resetGame() {
