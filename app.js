@@ -29,9 +29,13 @@ class LightRoulette {
         this.minRunTime = 2000; // Run at max speed for at least 2s
         this.slowDownDuration = 4000; // Slow down over 4s
         
-        // Audio
-        this.bgMusic = new Audio('Randomizer-back.mp3');
-        this.bgMusic.loop = false; // Play once until end
+        // Audio (Web Audio API for beat detection)
+        this.audioContext = null;
+        this.analyser = null;
+        this.audioBuffer = null;
+        this.audioSource = null;
+        this.audioLoaded = false;
+        this.loadAudio();
         
         this.init();
     }
@@ -43,16 +47,29 @@ class LightRoulette {
         this.applyTheme('rainbow'); // Default
     }
 
+    async loadAudio() {
+        try {
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            this.analyser = this.audioContext.createAnalyser();
+            this.analyser.fftSize = 256;
+            this.analyser.smoothingTimeConstant = 0.3;
+            
+            const response = await fetch('Randomizer-back.mp3');
+            const arrayBuffer = await response.arrayBuffer();
+            this.audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+            this.audioLoaded = true;
+            console.log('Audio loaded successfully');
+        } catch (e) {
+            console.error('Failed to load audio:', e);
+        }
+    }
+
     bindEvents() {
         // Theme button events
         this.themeBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 const theme = btn.dataset.theme;
-                
-                // Always apply theme (even if already active - important for Shuffle)
                 this.applyTheme(theme);
-                
-                // Update button states
                 this.themeBtns.forEach(b => {
                     b.classList.remove('active');
                     b.setAttribute('aria-pressed', 'false');
@@ -88,12 +105,9 @@ class LightRoulette {
     }
 
     calculateGridDimensions(count) {
-        // Calculate mostly square grid, but allow flexible row/col count
         const sqrt = Math.sqrt(count);
         let cols = Math.ceil(sqrt);
-        // For distinct layouts like 3, force 2 columns to make it 2+1 layout logic later
         if (count === 3) cols = 2; 
-        
         let rows = Math.ceil(count / cols);
         return { rows, cols };
     }
@@ -108,25 +122,11 @@ class LightRoulette {
         this.gridSize = { rows, cols };
 
         this.gridContainer.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-        // Rows usually auto, but we can enforce equal height
         this.gridContainer.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
 
-        // Fill grid with EXACTLY the number of names
         for (let i = 0; i < count; i++) {
             const cell = document.createElement('div');
             cell.className = 'grid-cell';
-            
-            // Handle centering the last item if it's dangling
-            // E.g. 3 items in 2 cols: Item 3 is at row 2, col 1. 
-            // If we want it to span, we can check if it's the last item and we have a gap.
-            // But for the "maze" logic, spanning cells might complicate neighbors. 
-            // Simple mapping for now: 1 cell = 1 name.
-            
-            // Special case for 3 items to make it look nice (Pyramid-ish or just centered)
-            // If 2 columns, item 2 (0-indexed) is alone on row 2.
-            // Let's letting it just be there is fine, or we can center it via CSS grid if desired.
-            // For the path logic, we need to know accurate neighbors.
-            
             cell.textContent = this.names[i];
             cell.dataset.index = i;
             
@@ -134,48 +134,25 @@ class LightRoulette {
             this.cells.push(cell);
         }
         
-        // If we have 3 items in 2 cols, the last item leaves a gap. 
-        // We can make the last child span 2 cols to fill the gap.
         if (count % cols !== 0) {
             const lastCell = this.cells[count - 1];
-            // Calculate how many empty spots
             const emptySpots = (rows * cols) - count;
-            // The last item can span 1 + emptySpots
             if (emptySpots > 0) {
                 lastCell.style.gridColumn = `span ${emptySpots + 1}`;
             }
         }
 
-        // IMPORTANT: Re-calculate neighbors logic needs to account for this grid structure?
-        // Our getNeighbors uses strictly (row, col) coordinates.
-        // If an item spans, it technically occupies multiple cells. 
-        // For simplicity in "maze runner", we can just treat it as occupying its primary cell index
-        // but physically visual connectivity might look weird if we don't update neighbors.
-        // Given visual complexity: Let's stick to strict grid cells but maybe center the grid content?
-        // Actually, spanning is better for aesthetics. I'll update getNeighbors to handle visual adjacency if needed.
-        // "getNeighbors" assumes full grid. If I span, the "maze" logic might get confused if I don't map carefully.
-        // Let's keep it simple: No span for now, just let grid be grid. 
-        // Or wait - user said "3 names gave 4". That was the main bug. 
-        // I removed the duplicate name filling. Now I have 3 cells. 
-        // Visuals might show a hole. That's acceptable for "roulette" unless I span.
-        // Let's try the span logic, it's prettier. 
-        
-        // Start visual idle state
         this.currentIdx = Math.floor(Math.random() * this.cells.length);
         this.updateVisuals();
     }
 
     getNeighbors(index) {
-        // This simple logic works well for uniform grids.
-        // If we have sparse grids (3 items), we need to ensure we don't return indices >= cells.length
-        
         const { rows, cols } = this.gridSize;
         const r = Math.floor(index / cols);
         const c = index % cols;
         const neighbors = [];
         const count = this.cells.length;
 
-        // Orthogonal moves
         const tryAdd = (idx) => {
             if (idx >= 0 && idx < count) {
                 neighbors.push(idx);
@@ -187,11 +164,10 @@ class LightRoulette {
         if (c > 0) tryAdd(r * cols + (c - 1)); // Left
         if (c < cols - 1) tryAdd(r * cols + (c + 1)); // Right
 
-        // Diagonal moves (for more erratic "spark" connectivity)
-        if (r > 0 && c > 0) tryAdd((r - 1) * cols + (c - 1)); // Top-Left
-        if (r > 0 && c < cols - 1) tryAdd((r - 1) * cols + (c + 1)); // Top-Right
-        if (r < rows - 1 && c > 0) tryAdd((r + 1) * cols + (c - 1)); // Bottom-Left
-        if (r < rows - 1 && c < cols - 1) tryAdd((r + 1) * cols + (c + 1)); // Bottom-Right
+        if (r > 0 && c > 0) tryAdd((r - 1) * cols + (c - 1));
+        if (r > 0 && c < cols - 1) tryAdd((r - 1) * cols + (c + 1));
+        if (r < rows - 1 && c > 0) tryAdd((r + 1) * cols + (c - 1));
+        if (r < rows - 1 && c < cols - 1) tryAdd((r + 1) * cols + (c + 1));
 
         return neighbors;
     }
@@ -199,32 +175,22 @@ class LightRoulette {
     moveLight() {
         const neighbors = this.getNeighbors(this.currentIdx);
         
-        // "Smart" Random Walk
-        // To fix "stuck in corners" or "focusing on one direction", we use a bias 
-        // towards "Least Recently Visited" cells. This ensures grid coverage.
-        
-        // Initialize visit history if not present
         if (!this.visitHistory) {
-            this.visitHistory = new Map(); // Index -> Timestamp
+            this.visitHistory = new Map();
         }
         
         const now = Date.now();
         this.visitHistory.set(this.currentIdx, now);
 
-        // Calculate weights
         let totalWeight = 0;
         const weights = neighbors.map(n => {
             const lastVisit = this.visitHistory.get(n) || 0;
             const timeSince = now - lastVisit;
-            // Weight increases with time since visit.
-            // Power of 2 makes it very hungry for new cells.
-            // Add minimal random noise to break ties or perfect loops
             const weight = Math.pow(timeSince + 100, 2) * (0.9 + Math.random() * 0.2); 
             totalWeight += weight;
             return { index: n, weight };
         });
 
-        // Weighted random selection
         let random = Math.random() * totalWeight;
         let next = neighbors[0];
         
@@ -236,7 +202,6 @@ class LightRoulette {
             }
         }
         
-        // Update trail
         this.trail.unshift(this.currentIdx);
         if (this.trail.length > this.trailLength) {
             this.trail.pop();
@@ -247,95 +212,135 @@ class LightRoulette {
     }
 
     updateVisuals() {
-        // Clear old classes and reset animation-delay
         this.cells.forEach(c => {
             c.classList.remove('head', 'trail-1', 'trail-2', 'trail-3');
             c.style.animationDelay = '';
         });
 
-        // Set Head with random animation offset for continuous rainbow feel
         if (this.cells[this.currentIdx]) {
             const head = this.cells[this.currentIdx];
             head.classList.add('head');
-            // Random offset into the 10s animation cycle
             if (this.currentTheme === 'rainbow') {
                 head.style.animationDelay = `-${Math.random() * 10}s`;
             }
         }
 
-        // Set Trail
         this.trail.forEach((idx, i) => {
             if (this.cells[idx]) {
-                // trail-1, trail-2, etc.
                 if (i < 3) this.cells[idx].classList.add(`trail-${i + 1}`);
             }
         });
     }
 
     startRoulette() {
-        this.isRunning = true;
-        this.goBtn.style.transform = 'scale(0)'; // Hide GO button
+        if (!this.audioLoaded) {
+            console.log('Audio not loaded yet, retrying...');
+            setTimeout(() => this.startRoulette(), 100);
+            return;
+        }
         
-        // Start Audio
-        this.bgMusic.currentTime = 0;
-        this.bgMusic.play().catch(e => console.log('Audio play failed:', e));
+        if (this.isRunning) return;
+        this.isRunning = true;
+        
+        // Hide button with scale animation
+        this.goBtn.style.transform = 'scale(0)';
 
+        // Start audio immediately
+        if (this.audioContext.state === 'suspended') {
+            this.audioContext.resume();
+        }
+        if (this.audioSource) {
+            try { this.audioSource.stop(); } catch(e) {}
+        }
+        this.audioSource = this.audioContext.createBufferSource();
+        this.audioSource.buffer = this.audioBuffer;
+        this.audioSource.connect(this.analyser);
+        this.analyser.connect(this.audioContext.destination);
+        this.audioSource.start(0);
+        
+        // Start game logic immediately
+        this.runGameLogic();
+    }
+
+    runGameLogic() {
         // Reset visit tracking for this "spin"
         this.visitHistory = new Map();
         
-        let speed = 50; // ms per move (fast!)
+        // Beat detection state
+        const dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+        let lastBeatTime = 0;
+        let lastMoveTime = 0;
+        const beatCooldown = 60; 
+        let energyHistory = [];
+        const historySize = 20;
         let startTime = Date.now();
         let slowingDown = false;
         let slowdownStartTime = 0;
 
-        const loop = () => {
+        const detectBeat = () => {
             if (!this.isRunning) return;
-
+            
+            this.analyser.getByteFrequencyData(dataArray);
+            
+            // Focus on bass frequencies (first 10 bins)
+            let bassEnergy = 0;
+            for (let i = 0; i < 10; i++) {
+                bassEnergy += dataArray[i];
+            }
+            bassEnergy /= 10;
+            
+            // Calculate average energy
+            energyHistory.push(bassEnergy);
+            if (energyHistory.length > historySize) energyHistory.shift();
+            const avgEnergy = energyHistory.reduce((a, b) => a + b, 0) / energyHistory.length;
+            
             const now = Date.now();
             const elapsed = now - startTime;
-
-            // Move logic
-            this.moveLight();
-
-            // Timing logic
-            if (!slowingDown) {
-                // Feature update: Ensure "Full Cycle" coverage.
-                // Like a real roulette wheel passes every number, we must ensure
-                // the light has visited EVERY cell at least once before we even think about stopping.
-                const allVisited = this.visitHistory.size === this.cells.length;
-
-                if (elapsed > this.minRunTime && allVisited) {
-                    slowingDown = true;
-                    slowdownStartTime = now;
-                    // Reset opacity or visuals if needed for 'stopping' phase? 
-                    // No, existing visual is fine.
-                }
-                setTimeout(() => requestAnimationFrame(loop), speed);
-            } else {
-                // Slowdown phase
+            const timeSinceLastMove = now - lastMoveTime;
+            
+            // Dynamic threshold and max interval based on phase
+            let threshold = 1.15;
+            let maxInterval = 100;
+            
+            if (slowingDown) {
                 const slowElapsed = now - slowdownStartTime;
-                const progress = slowElapsed / this.slowDownDuration; // 0 to 1
-
+                const progress = slowElapsed / this.slowDownDuration;
+                
                 if (progress >= 1) {
                     this.finish();
                     return;
                 }
-
-                // Easing function: Exponential ease out for interval
-                // We want speed (interval) to go from 50ms to ~800ms
-                const currentInterval = 50 + (1000 * (1 - Math.pow(1 - progress, 3))); // Cubic ease out-ish
                 
-                // Wait for the calculated interval
-                setTimeout(() => requestAnimationFrame(loop), currentInterval);
+                threshold = 1.15 + (progress * 1.5);
+                maxInterval = 100 + (progress * 900);
             }
+            
+            const isBeat = bassEnergy > avgEnergy * threshold && (now - lastBeatTime) > beatCooldown;
+            const needsFallback = timeSinceLastMove > maxInterval;
+            
+            if (isBeat || needsFallback) {
+                if (isBeat) lastBeatTime = now;
+                lastMoveTime = now;
+                this.moveLight();
+                
+                if (!slowingDown) {
+                    const allVisited = this.visitHistory.size === this.cells.length;
+                    if (elapsed > this.minRunTime && allVisited) {
+                        slowingDown = true;
+                        slowdownStartTime = now;
+                    }
+                }
+            }
+            
+            requestAnimationFrame(detectBeat);
         };
-
-        loop();
+        
+        lastMoveTime = Date.now();
+        detectBeat();
     }
 
     finish() {
         this.isRunning = false;
-        // Audio continues playing until end
         const winnerName = this.cells[this.currentIdx].textContent;
         this.showWinner(winnerName);
     }
@@ -343,7 +348,6 @@ class LightRoulette {
     showWinner(name) {
         this.winnerName.textContent = name;
         this.winnerOverlay.classList.add('visible');
-        
         this.triggerHappyEmojis();
     }
 
@@ -351,38 +355,32 @@ class LightRoulette {
         const emojis = ['😁', '🎉', '🥳', '👏', '👯', '🌟', '✨', '🤩', '🎈', '🎊'];
         const container = document.body;
         
-        // Spawn 50 emojis
         for (let i = 0; i < 50; i++) {
             const el = document.createElement('div');
             el.className = 'floating-emoji';
             el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-            
-            // Random properties
             el.style.left = Math.random() * 100 + 'vw';
-            el.style.animationDuration = (2 + Math.random() * 3) + 's'; // 2-5s
-            el.style.fontSize = (1.5 + Math.random() * 2.5) + 'rem'; // 1.5-4rem
-            
+            el.style.animationDuration = (2 + Math.random() * 3) + 's';
+            el.style.fontSize = (1.5 + Math.random() * 2.5) + 'rem';
             container.appendChild(el);
-            
-            // Clean up
-            setTimeout(() => {
-                el.remove();
-            }, 5000);
+            setTimeout(() => el.remove(), 5000);
         }
     }
 
     resetGame() {
-        // Audio continues playing if still running
+        this.isRunning = false;
+
+        document.querySelectorAll('.shockwave-overlay').forEach(el => el.remove());
+        
+        if (this.audioSource) {
+            try { this.audioSource.stop(); } catch(e) {}
+            this.audioSource = null;
+        }
+        
         this.winnerOverlay.classList.remove('visible');
         this.goBtn.style.transform = 'scale(1)';
         this.trail = [];
         this.updateVisuals();
-        
-        // If shuffle mode, maybe shuffle color again on reset? 
-        // User didn't explicitly ask to re-shuffle on every reset, but "shuffle" implies it.
-        // Let's keep it simple: Shuffle is set when you click the radio. 
-        // But re-clicking the radio or a "Shuffle Again" button would be nice. 
-        // For now, selecting the radio triggers it.
     }
 
     applyTheme(mode) {

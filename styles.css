@@ -509,3 +509,46 @@ textarea:focus {
         opacity: 0;
     }
 }
+
+/* Shockwave Effect - GENTLE RIPPLE */
+.shockwave-overlay {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: transparent;
+    border: 3px solid rgba(34, 211, 238, 0.6);
+    box-shadow:
+        0 0 20px rgba(34, 211, 238, 0.4),
+        inset 0 0 20px rgba(34, 211, 238, 0.1);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 2147483647;
+    opacity: 0;
+}
+
+.shockwave-active {
+    animation: rippleExpand 1.2s ease-out forwards;
+}
+
+@keyframes rippleExpand {
+    0% {
+        width: 0;
+        height: 0;
+        opacity: 0.9;
+        border-width: 4px;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+
+    100% {
+        width: 150vmax;
+        height: 150vmax;
+        opacity: 0;
+        border-width: 1px;
+    }
+}
