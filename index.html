@@ -13,9 +13,15 @@
     <div class="app-container">
         <!-- Setup Panel -->
         <div class="controls-panel" id="controlsPanel">
-            <h1>Neon Roulette</h1>
-            <div class="input-group">
-                <textarea id="namesInput" placeholder="Enter names (one per line)">Team Alpha
+            <div class="panel-header" id="panelHeader">
+                <h1>Neon Roulette</h1>
+                <button type="button" class="panel-toggle" id="panelToggle" aria-expanded="false" aria-label="Toggle settings">
+                    <span class="chevron">▼</span>
+                </button>
+            </div>
+            <div class="panel-content" id="panelContent">
+                <div class="input-group">
+                    <textarea id="namesInput" placeholder="Enter names (one per line)">Team Alpha
 Team Beta
 Team Gamma
 Team Delta
@@ -24,8 +30,9 @@ Team Zeta
 Team Eta
 Team Theta
 Team Iota</textarea>
+                </div>
+                <button id="updateGridBtn" class="secondary-btn">Update Grid</button>
             </div>
-            <button id="updateGridBtn" class="secondary-btn">Update Grid</button>
         </div>
 
         <!-- Main Game Area -->

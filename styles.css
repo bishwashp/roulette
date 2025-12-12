@@ -117,6 +117,23 @@ h1 {
     flex-direction: column;
 }
 
+/* Desktop: Hide toggle, show content always */
+.panel-header {
+    display: flex;
+    align-items: center;
+}
+
+.panel-toggle {
+    display: none;
+}
+
+.panel-content {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    gap: 1rem;
+}
+
 textarea {
     width: 100%;
     height: 100%;
@@ -469,16 +486,159 @@ textarea:focus {
         flex-direction: column;
         height: auto;
         min-height: 100vh;
-        padding: 1rem 0;
+        padding: 0.5rem;
+        gap: 0.5rem;
     }
 
     .controls-panel {
         width: 100%;
         height: auto;
+        padding: 0.75rem;
     }
 
+    /* Collapsible panel header */
+    .panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+    }
+
+    .panel-header h1 {
+        font-size: 1.3rem;
+        margin: 0;
+    }
+
+    .panel-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        border-radius: 8px;
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: transform 0.3s ease, background 0.2s;
+    }
+
+    .panel-toggle:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .panel-toggle .chevron {
+        transition: transform 0.3s ease;
+    }
+
+    .controls-panel.expanded .panel-toggle .chevron {
+        transform: rotate(180deg);
+    }
+
+    /* Hidden content by default on mobile */
+    .panel-content {
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+        margin-top: 0;
+    }
+
+    .controls-panel.expanded .panel-content {
+        max-height: 400px;
+        opacity: 1;
+        margin-top: 1rem;
+    }
+
+    .controls-panel h1 {
+        font-size: 1.3rem;
+    }
+
+    .controls-panel textarea {
+        font-size: 0.9rem;
+        min-height: 100px;
+    }
+
+    .game-area {
+        width: 100%;
+        padding: 0.5rem;
+    }
+
+    /* Theme bar - stack vertically on mobile */
+    .theme-bar {
+        flex-direction: column;
+        align-items: stretch;
+        align-self: stretch;
+        gap: 0.5rem;
+    }
+
+    .theme-label {
+        text-align: center;
+    }
+
+    .theme-segmented-control {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.5rem;
+    }
+
+    .theme-btn {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.75rem;
+    }
+
+    .theme-btn .btn-label {
+        display: none;
+    }
+
+    .theme-btn .btn-icon {
+        font-size: 1.2rem;
+    }
+
+    /* Grid - full width, smaller cells */
     .grid-container {
         width: 100%;
+        min-height: 50vh;
+        gap: 0.3rem;
+        padding: 0.5rem;
+    }
+
+    .grid-cell {
+        font-size: 0.9rem;
+        padding: 0.5rem;
+        min-height: 60px;
+    }
+
+    /* GO button - larger touch target */
+    .go-btn {
+        font-size: 1rem;
+        padding: 1rem 2rem;
+        min-height: 60px;
+    }
+
+    .action-bar {
+        padding: 0.5rem 0;
+    }
+
+    /* Winner overlay */
+    .winner-content {
+        padding: 2rem 1.5rem;
+        margin: 1rem;
+    }
+
+    .winner-name {
+        font-size: 2rem;
+    }
+
+    .winner-label {
+        font-size: 0.8rem;
+    }
+
+    .reset-btn {
+        padding: 0.8rem 2rem;
+        font-size: 1rem;
     }
 }
 

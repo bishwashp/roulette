@@ -95,6 +95,24 @@ class LightRoulette {
         this.resetBtn.addEventListener('click', () => {
             this.resetGame();
         });
+
+        // Mobile panel toggle
+        const panelToggle = document.getElementById('panelToggle');
+        const controlsPanel = document.getElementById('controlsPanel');
+        const panelHeader = document.getElementById('panelHeader');
+        
+        if (panelToggle && controlsPanel) {
+            const togglePanel = () => {
+                const isExpanded = controlsPanel.classList.toggle('expanded');
+                panelToggle.setAttribute('aria-expanded', isExpanded);
+            };
+            panelToggle.addEventListener('click', togglePanel);
+            panelHeader.addEventListener('click', (e) => {
+                if (e.target !== panelToggle && !panelToggle.contains(e.target)) {
+                    togglePanel();
+                }
+            });
+        }
     }
 
     parseNames() {
