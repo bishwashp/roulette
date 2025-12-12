@@ -482,6 +482,13 @@ textarea:focus {
 
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
+    body {
+        height: auto;
+        min-height: 100vh;
+        overflow-y: auto;
+        align-items: flex-start;
+    }
+
     .app-container {
         flex-direction: column;
         height: auto;
