@@ -250,7 +250,7 @@ class LightRoulette {
         });
     }
 
-    startRoulette() {
+    async startRoulette() {
         if (!this.audioLoaded) {
             console.log('Audio not loaded yet, retrying...');
             setTimeout(() => this.startRoulette(), 100);
@@ -263,9 +263,9 @@ class LightRoulette {
         // Hide button with scale animation
         this.goBtn.style.transform = 'scale(0)';
 
-        // Start audio immediately
+        // Start audio - MUST await resume on iOS Safari
         if (this.audioContext.state === 'suspended') {
-            this.audioContext.resume();
+            await this.audioContext.resume();
         }
         if (this.audioSource) {
             try { this.audioSource.stop(); } catch(e) {}
