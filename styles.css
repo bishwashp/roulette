@@ -584,14 +584,14 @@ body.floor-mode .grid-cell {
 }
 
 body.floor-mode .grid-cell.head {
-    background: linear-gradient(135deg, #ffd700 0%, #ff8c00 50%, #ffd700 100%);
-    border-color: #ffd700;
-    color: #000;
-    text-shadow: none;
+    background: linear-gradient(135deg, #ffd700 0%, #ff8c00 50%, #ffd700 100%) !important;
+    border-color: #ffd700 !important;
+    color: #000 !important;
+    text-shadow: none !important;
     box-shadow:
         0 0 30px rgba(255, 215, 0, 0.7),
         0 0 60px rgba(255, 140, 0, 0.4),
-        inset 0 0 15px rgba(255, 255, 255, 0.3);
+        inset 0 0 15px rgba(255, 255, 255, 0.3) !important;
     animation: floorPulse 1s ease-in-out infinite;
 }
 
