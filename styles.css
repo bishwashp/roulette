@@ -552,3 +552,99 @@ textarea:focus {
         border-width: 1px;
     }
 }
+
+/* ==============================
+   THE FLOOR THEME
+   Tribute to Fox's "The Floor" game show
+   ============================== */
+
+body.floor-mode {
+    background: #0a0a0a;
+}
+
+body.floor-mode .controls-panel {
+    background: rgba(30, 58, 95, 0.4);
+    border-color: rgba(37, 99, 235, 0.3);
+}
+
+body.floor-mode h1 {
+    background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+body.floor-mode .grid-cell {
+    background: linear-gradient(145deg, #1e3a5f, #0f2744);
+    border: 2px solid #2563eb;
+    box-shadow:
+        0 0 15px rgba(37, 99, 235, 0.3),
+        inset 0 0 10px rgba(37, 99, 235, 0.1);
+    color: #93c5fd;
+}
+
+body.floor-mode .grid-cell.head {
+    background: linear-gradient(135deg, #ffd700 0%, #ff8c00 50%, #ffd700 100%);
+    border-color: #ffd700;
+    color: #000;
+    text-shadow: none;
+    box-shadow:
+        0 0 30px rgba(255, 215, 0, 0.7),
+        0 0 60px rgba(255, 140, 0, 0.4),
+        inset 0 0 15px rgba(255, 255, 255, 0.3);
+    animation: floorPulse 1s ease-in-out infinite;
+}
+
+@keyframes floorPulse {
+
+    0%,
+    100% {
+        box-shadow:
+            0 0 30px rgba(255, 215, 0, 0.7),
+            0 0 60px rgba(255, 140, 0, 0.4);
+    }
+
+    50% {
+        box-shadow:
+            0 0 50px rgba(255, 215, 0, 0.9),
+            0 0 80px rgba(255, 140, 0, 0.6);
+    }
+}
+
+body.floor-mode .grid-cell.trail-1 {
+    background: linear-gradient(145deg, #2d4a6f, #1a3652);
+    border-color: #3b82f6;
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+}
+
+body.floor-mode .grid-cell.trail-2 {
+    background: linear-gradient(145deg, #264059, #152d45);
+    border-color: #2563eb;
+    box-shadow: 0 0 12px rgba(37, 99, 235, 0.3);
+}
+
+body.floor-mode .grid-cell.trail-3 {
+    background: linear-gradient(145deg, #1e3550, #0f2438);
+    border-color: #1d4ed8;
+    box-shadow: 0 0 8px rgba(29, 78, 216, 0.2);
+}
+
+body.floor-mode .go-btn {
+    background: linear-gradient(135deg, #ffd700, #ff8c00);
+    color: #000;
+    font-weight: 700;
+    box-shadow:
+        0 0 30px rgba(255, 215, 0, 0.5),
+        0 0 60px rgba(255, 140, 0, 0.3);
+}
+
+body.floor-mode .go-btn:hover {
+    box-shadow:
+        0 0 50px rgba(255, 215, 0, 0.7),
+        0 0 80px rgba(255, 140, 0, 0.5);
+}
+
+body.floor-mode .theme-btn.active {
+    background: linear-gradient(135deg, #ffd700, #ff8c00);
+    color: #000;
+}

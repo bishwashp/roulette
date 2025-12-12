@@ -389,7 +389,7 @@ class LightRoulette {
 
         // Reset UI
         this.customColorWrapper.classList.remove('visible');
-        body.classList.remove('rainbow-mode');
+        body.classList.remove('rainbow-mode', 'floor-mode');
         
         if (mode === 'rainbow') {
             // Rainbow is pure CSS - just add the class
@@ -404,6 +404,9 @@ class LightRoulette {
         } else if (mode === 'custom') {
             this.customColorWrapper.classList.add('visible');
             this.setCustomColor(this.colorPicker.value);
+        } else if (mode === 'floor') {
+            // The Floor theme - tribute to Fox game show
+            body.classList.add('floor-mode');
         }
     }
     setCustomColor(hex) {
